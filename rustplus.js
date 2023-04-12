@@ -8,6 +8,8 @@ const Camera = require('./camera');
 
 class RustPlus extends EventEmitter {
 
+    //test
+
     /**
      * @param server The ip address or hostname of the Rust Server
      * @param port The port of the Rust Server (app.port in server.cfg)
