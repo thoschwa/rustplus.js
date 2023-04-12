@@ -8,14 +8,12 @@ const Camera = require('./camera');
 
 class RustPlus extends EventEmitter {
 
-    //test
-
     /**
      * @param server The ip address or hostname of the Rust Server
      * @param port The port of the Rust Server (app.port in server.cfg)
      * @param playerId SteamId of the Player
      * @param playerToken Player Token from Server Pairing
-     * @param useFacepunchProxy True to use secure websocket via Facepunch's proxy, or false to directly connect to Rust Server
+     * @param useProxy
      *
      * Events emitted by the RustPlus class instance
      * - connecting: When we are connecting to the Rust Server.
@@ -25,7 +23,7 @@ class RustPlus extends EventEmitter {
      * - disconnected: When we are disconnected from the Rust Server.
      * - error: When something goes wrong.
      */
-    constructor(server, port, playerId, playerToken, useFacepunchProxy = false) {
+    constructor(server, port, playerId, playerToken, useProxy = false) {
 
         super();
 
@@ -33,7 +31,7 @@ class RustPlus extends EventEmitter {
         this.port = port;
         this.playerId = playerId;
         this.playerToken = playerToken;
-        this.useFacepunchProxy = useFacepunchProxy;
+        this.useProxy = useProxy;
 
         this.seq = 0;
         this.seqCallbacks = [];
@@ -60,9 +58,22 @@ class RustPlus extends EventEmitter {
             // fire event as we are connecting
             this.emit('connecting');
 
+
+            //PROXY CONFIG START
+
+            var HttpsProxyAgent = require('https-proxy-agent');
+
+            var proxy = 'http://64.225.8.118:9990';
+            var address = `ws://${this.server}:${this.port}`;
+
+            var agent = new HttpsProxyAgent(url.parse(proxy));
+
+            //PROXY CONFIG END
+
+
             // connect to websocket
-            var address = this.useFacepunchProxy ? `wss://companion-rust.facepunch.com/game/${this.server}/${this.port}` : `ws://${this.server}:${this.port}`;
-            this.websocket = new WebSocket(address);
+            var address = `ws://${this.server}:${this.port}`;
+            this.websocket = new WebSocket(address, { agent: this.useProxy ? agent : null });
 
             // fire event when connected
             this.websocket.on('open', () => {
