@@ -6,6 +6,8 @@ const protobuf = require("protobufjs");
 const { EventEmitter } = require('events');
 const Camera = require('./camera');
 
+var HttpsProxyAgent = require('https-proxy-agent');
+
 class RustPlus extends EventEmitter {
 
     /**
@@ -13,7 +15,7 @@ class RustPlus extends EventEmitter {
      * @param port The port of the Rust Server (app.port in server.cfg)
      * @param playerId SteamId of the Player
      * @param playerToken Player Token from Server Pairing
-     * @param useProxy
+     * @param proxy
      *
      * Events emitted by the RustPlus class instance
      * - connecting: When we are connecting to the Rust Server.
@@ -23,7 +25,7 @@ class RustPlus extends EventEmitter {
      * - disconnected: When we are disconnected from the Rust Server.
      * - error: When something goes wrong.
      */
-    constructor(server, port, playerId, playerToken, useProxy = false) {
+    constructor(server, port, playerId, playerToken, proxy) {
 
         super();
 
@@ -31,7 +33,7 @@ class RustPlus extends EventEmitter {
         this.port = port;
         this.playerId = playerId;
         this.playerToken = playerToken;
-        this.useProxy = useProxy;
+        this.proxy = proxy;
 
         this.seq = 0;
         this.seqCallbacks = [];
@@ -58,22 +60,9 @@ class RustPlus extends EventEmitter {
             // fire event as we are connecting
             this.emit('connecting');
 
-
-            //PROXY CONFIG START
-
-            var HttpsProxyAgent = require('https-proxy-agent');
-
-            var proxy = 'http://64.225.8.118:9990';
-            var address = `ws://${this.server}:${this.port}`;
-
-            var agent = new HttpsProxyAgent(url.parse(proxy));
-
-            //PROXY CONFIG END
-
-
             // connect to websocket
             var address = `ws://${this.server}:${this.port}`;
-            this.websocket = new WebSocket(address, { agent: this.useProxy ? agent : null });
+            this.websocket = new WebSocket(address, { agent: this.proxy !== undefined ? new HttpsProxyAgent(proxy) : null });
 
             // fire event when connected
             this.websocket.on('open', () => {
