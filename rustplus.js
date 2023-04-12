@@ -62,7 +62,7 @@ class RustPlus extends EventEmitter {
 
             // connect to websocket
             var address = `ws://${this.server}:${this.port}`;
-            this.websocket = new WebSocket(address, { agent: this.proxy !== undefined ? new HttpsProxyAgent(proxy) : null });
+            this.websocket = new WebSocket(address, { agent: this.proxy !== undefined ? new HttpsProxyAgent(this.proxy) : null });
 
             // fire event when connected
             this.websocket.on('open', () => {
