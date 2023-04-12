@@ -5,6 +5,7 @@ const WebSocket = require('ws');
 const protobuf = require("protobufjs");
 const { EventEmitter } = require('events');
 const Camera = require('./camera');
+const Url = require('url');
 
 var HttpsProxyAgent = require('https-proxy-agent');
 
@@ -62,7 +63,7 @@ class RustPlus extends EventEmitter {
 
             // connect to websocket
             var address = `ws://${this.server}:${this.port}`;
-            this.websocket = new WebSocket(address, { agent: this.proxy !== undefined ? new HttpsProxyAgent(this.proxy) : null });
+            this.websocket = new WebSocket(address, { agent: this.proxy !== undefined ? new HttpsProxyAgent(Url.parse(this.proxy)) : null });
 
             // fire event when connected
             this.websocket.on('open', () => {
